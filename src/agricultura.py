@@ -1,20 +1,10 @@
-import pandas as pd
-import sidrapy
-import numpy as np
+import time
+from extractor import Extractor
 
 # https://apisidra.ibge.gov.br/home
+broze_folder = "C:/Users/vinic/OneDrive/Documentos/python/project_hub/data/test"
 
-
-def get_data(product) -> pd.DataFrame:
-    data = sidrapy.get_table(
-        table_code="5457",
-        territorial_level="6",
-        ibge_territorial_code="all",
-        variable="8331,216,214,112,215",
-        classifications={"782": product},
-        period="2023",
-    )
-    return data
+extractor_agricultura = Extractor("5457", "8331,216,214,112,215", "2023")
 
 
 def get_all():
@@ -91,13 +81,28 @@ def get_all():
         "40273",
         "40274",
     ]
-    df_full = pd.DataFrame()
-    for produto in produtos:
-        data = get_data(product=produto)
-        df_full = pd.concat([df_full, data])
-        print(f"{produto}")
-    return df_full
+    completed_products = []
+    start_time_total = time.time()
+
+    for produto in produtos[:]:
+        start_time = time.time()
+        data = extractor_agricultura.get_data(product=produto)
+        data.to_parquet(f"{broze_folder}/{produto}.parquet")
+        elapsed_time = time.time() - start_time
+        print(
+            f"Time taken for {produto}: {int(elapsed_time // 60)} min and {int(elapsed_time % 60)} sec"
+        )
+        completed_products.append(produto)
+        print(
+            f"{len(produtos) - len(completed_products)} products left to be downloaded"
+        )
+
+    elapsed_time_global = time.time() - start_time_total
+    print(
+        f"Time taken for all the products: {int(elapsed_time_global // 60)} minutes and {int(elapsed_time_global % 60)} seconds"
+    )
 
 
-data = get_all()
-data
+if __name__ == __name__:
+    data = get_all()
+    data
