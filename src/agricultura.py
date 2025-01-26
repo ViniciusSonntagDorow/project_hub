@@ -8,7 +8,7 @@ import numpy as np
 bronze_folder = "C:/Users/vinic/OneDrive/Documentos/python/project_hub/data/bronze"
 silver_folder = "C:/Users/vinic/OneDrive/Documentos/python/project_hub/data/silver"
 
-extractor_agricultura = Extractor("5457", "8331,216,214,112,215", "2023")
+extractor_agricultura = Extractor("5457", "8331,216,214,112,215", "2023", "782")
 
 
 def get_all():
@@ -161,7 +161,7 @@ def transform_data(grouped_df: pd.DataFrame) -> pd.DataFrame:
     return grouped_df
 
 
-if __name__ == __name__:
+if __name__ == "__main__":
     # Bronze
     get_all()
 

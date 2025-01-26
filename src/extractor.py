@@ -3,12 +3,15 @@ import pandas as pd
 
 
 class Extractor:
-    def __init__(self, table: str, variable: str, period: str) -> None:
+    def __init__(
+        self, table: str, variable: str, period: str, classification: str
+    ) -> None:
         self.table_code = table
         self.territorial_level = "6"
         self.ibge_territorial_code = "all"
         self.variable = variable
         self.period = period
+        self.classification = classification
 
     def get_data(self, product: list[str]) -> pd.DataFrame:
         try:
@@ -17,7 +20,7 @@ class Extractor:
                 territorial_level=self.territorial_level,
                 ibge_territorial_code=self.ibge_territorial_code,
                 variable=self.variable,
-                classifications={"782": product},
+                classifications={self.classification: product},
                 period=self.period,
             )
         except Exception as e:
