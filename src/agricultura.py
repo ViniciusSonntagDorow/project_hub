@@ -1,8 +1,12 @@
 import time
 from extractor import Extractor
+import pandas as pd
+import os
+import numpy as np
 
 # https://apisidra.ibge.gov.br/home
-broze_folder = "C:/Users/vinic/OneDrive/Documentos/python/project_hub/data/test"
+bronze_folder = "C:/Users/vinic/OneDrive/Documentos/python/project_hub/data/bronze"
+silver_folder = "C:/Users/vinic/OneDrive/Documentos/python/project_hub/data/silver"
 
 extractor_agricultura = Extractor("5457", "8331,216,214,112,215", "2023")
 
@@ -87,7 +91,7 @@ def get_all():
     for produto in produtos[:]:
         start_time = time.time()
         data = extractor_agricultura.get_data(product=produto)
-        data.to_parquet(f"{broze_folder}/{produto}.parquet")
+        data.to_parquet(f"{bronze_folder}/{produto}.parquet")
         elapsed_time = time.time() - start_time
         print(
             f"Time taken for {produto}: {int(elapsed_time // 60)} min and {int(elapsed_time % 60)} sec"
@@ -103,6 +107,65 @@ def get_all():
     )
 
 
+def union_data() -> pd.DataFrame:
+    grouped_df = pd.DataFrame()
+    for file in os.listdir(bronze_folder):
+        df = pd.read_parquet(f"{bronze_folder}/{file}")
+        grouped_df = pd.concat([grouped_df, df], ignore_index=True)
+    return grouped_df
+
+
+def transform_data(grouped_df: pd.DataFrame) -> pd.DataFrame:
+    grouped_df.columns = grouped_df.iloc[0]
+    grouped_df = grouped_df.loc[grouped_df["Valor"] != "Valor"]
+
+    grouped_df = (
+        grouped_df.drop(
+            columns=[
+                "Nível Territorial (Código)",
+                "Nível Territorial",
+                "Unidade de Medida (Código)",
+                # "Produto das lavouras temporárias e permanentes",
+                "Ano (Código)",
+                # "Variável",
+            ]
+        )
+        .assign(Valor=lambda x: x["Valor"].replace({"-": "0", "...": "0"}))
+        # .drop(columns=["Unidade de Medida", "Município"])
+        .rename(
+            columns={
+                "Município (Código)": "cod_municipio",
+                "Produto das lavouras temporárias e permanentes (Código)": "cod_produto",
+                "Ano": "ano",
+                "Variável (Código)": "cod_variavel",
+                "Valor": "valor",
+            }
+        )
+        .astype(
+            {
+                "valor": int,
+                "cod_municipio": int,
+                "cod_produto": int,
+                "cod_variavel": int,
+                "ano": int,
+            }
+        )
+    )
+    grouped_df = grouped_df.assign(
+        valor=np.where(
+            grouped_df["cod_variavel"] == 215,
+            grouped_df["valor"] * 1000,
+            grouped_df["valor"],
+        )
+    )
+    return grouped_df
+
+
 if __name__ == __name__:
-    data = get_all()
-    data
+    # Bronze
+    get_all()
+
+    # Silver
+    grouped = union_data()
+    transformed = transform_data(grouped)
+    transformed.to_parquet(f"{silver_folder}/agricultura_silver.parquet", index=False)

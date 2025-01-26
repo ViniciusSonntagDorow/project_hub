@@ -1,6 +1,5 @@
 import sidrapy
 import pandas as pd
-from typing import List
 
 
 class Extractor:
@@ -11,7 +10,7 @@ class Extractor:
         self.variable = variable
         self.period = period
 
-    def get_data(self, product: List[str]) -> pd.DataFrame:
+    def get_data(self, product: list[str]) -> pd.DataFrame:
         try:
             data = sidrapy.get_table(
                 table_code=self.table_code,
