@@ -27,3 +27,17 @@ class Extractor:
             print(f"Error fetching data for product {product}: {e}")
             return pd.DataFrame()
         return data
+
+    def get_data_small(self) -> pd.DataFrame:
+        try:
+            data = sidrapy.get_table(
+                table_code=self.table_code,
+                territorial_level=self.territorial_level,
+                ibge_territorial_code=self.ibge_territorial_code,
+                variable=self.variable,
+                period=self.period,
+            )
+        except Exception as e:
+            print(f"Error fetching data: {e}")
+            return pd.DataFrame()
+        return data

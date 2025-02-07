@@ -5,8 +5,7 @@ import os
 import numpy as np
 
 # https://apisidra.ibge.gov.br/home
-bronze_folder = "C:/Users/vinic/OneDrive/Documentos/python/project_hub/data/bronze"
-silver_folder = "C:/Users/vinic/OneDrive/Documentos/python/project_hub/data/silver"
+PATH = "C:/Users/vinic/OneDrive/Documentos/python/project_hub/data"
 
 extractor_agricultura = Extractor("5457", "8331,216,214,112,215", "2023", "782")
 
@@ -91,7 +90,7 @@ def get_all():
     for produto in produtos[:]:
         start_time = time.time()
         data = extractor_agricultura.get_data(product=produto)
-        data.to_parquet(f"{bronze_folder}/{produto}.parquet")
+        data.to_parquet(f"{PATH}/bronze/agricultura/{produto}.parquet")
         elapsed_time = time.time() - start_time
         print(
             f"Time taken for {produto}: {int(elapsed_time // 60)} min and {int(elapsed_time % 60)} sec"
@@ -109,8 +108,8 @@ def get_all():
 
 def union_data() -> pd.DataFrame:
     grouped_df = pd.DataFrame()
-    for file in os.listdir(bronze_folder):
-        df = pd.read_parquet(f"{bronze_folder}/{file}")
+    for file in os.listdir(f"{PATH}/bronze/agricultura"):
+        df = pd.read_parquet(f"{PATH}/bronze/agricultura/{file}")
         grouped_df = pd.concat([grouped_df, df], ignore_index=True)
     return grouped_df
 
@@ -139,6 +138,7 @@ def transform_data(grouped_df: pd.DataFrame) -> pd.DataFrame:
                 "Ano": "ano",
                 "Variável (Código)": "cod_variavel",
                 "Valor": "valor",
+                "Produto das lavouras temporárias e permanentes": "produto",
             }
         )
         .astype(
@@ -168,4 +168,4 @@ if __name__ == "__main__":
     # Silver
     grouped = union_data()
     transformed = transform_data(grouped)
-    transformed.to_parquet(f"{silver_folder}/agricultura_silver.parquet", index=False)
+    transformed.to_parquet(f"{PATH}/silver/agricultura_silver.parquet", index=False)
