@@ -8,7 +8,6 @@ import numpy as np
 
 extractor_produtos = Extractor("74", "106,215", "2023", "80")
 extractor_aquicultura = Extractor("3940", "4146,215", "2023", "654")
-extractor_rebanhos = Extractor("3939", "105", "2023", "79")
 
 
 def get_all_produtos():
@@ -151,8 +150,8 @@ def transform_data(grouped_df: pd.DataFrame) -> pd.DataFrame:
 
 if __name__ == "__main__":
     # Bronze
-    # get_all_produtos()
-    # get_all_aquicultura()
+    get_all_produtos()
+    get_all_aquicultura()
 
     # Silver
     grouped = union_data()

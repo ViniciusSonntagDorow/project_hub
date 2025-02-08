@@ -5,7 +5,6 @@ import os
 import numpy as np
 
 # https://apisidra.ibge.gov.br/home
-PATH = "C:/Users/vinic/OneDrive/Documentos/python/project_hub/data"
 
 extractor_agricultura = Extractor("5457", "8331,216,214,112,215", "2023", "782")
 
@@ -90,7 +89,7 @@ def get_all():
     for produto in produtos[:]:
         start_time = time.time()
         data = extractor_agricultura.get_data(product=produto)
-        data.to_parquet(f"{PATH}/bronze/agricultura/{produto}.parquet")
+        data.to_parquet(f"../data/bronze/agricultura/{produto}.parquet")
         elapsed_time = time.time() - start_time
         print(
             f"Time taken for {produto}: {int(elapsed_time // 60)} min and {int(elapsed_time % 60)} sec"
@@ -108,8 +107,8 @@ def get_all():
 
 def union_data() -> pd.DataFrame:
     grouped_df = pd.DataFrame()
-    for file in os.listdir(f"{PATH}/bronze/agricultura"):
-        df = pd.read_parquet(f"{PATH}/bronze/agricultura/{file}")
+    for file in os.listdir("../data/bronze/agricultura"):
+        df = pd.read_parquet(f"../data/bronze/agricultura/{file}")
         grouped_df = pd.concat([grouped_df, df], ignore_index=True)
     return grouped_df
 
@@ -123,40 +122,46 @@ def transform_data(grouped_df: pd.DataFrame) -> pd.DataFrame:
             columns=[
                 "Nível Territorial (Código)",
                 "Nível Territorial",
-                "Unidade de Medida (Código)",
-                # "Produto das lavouras temporárias e permanentes",
                 "Ano (Código)",
-                # "Variável",
             ]
         )
         .assign(Valor=lambda x: x["Valor"].replace({"-": "0", "...": "0"}))
-        # .drop(columns=["Unidade de Medida", "Município"])
         .rename(
             columns={
+                "Unidade de Medida (Código)": "cod_unidade_medida",
+                "Unidade de Medida": "unidade_medida",
+                "Valor": "valor",
                 "Município (Código)": "cod_municipio",
-                "Produto das lavouras temporárias e permanentes (Código)": "cod_produto",
+                "Município": "municipio",
                 "Ano": "ano",
                 "Variável (Código)": "cod_variavel",
-                "Valor": "valor",
+                "Variável": "variavel",
+                "Produto das lavouras temporárias e permanentes (Código)": "cod_produto",
                 "Produto das lavouras temporárias e permanentes": "produto",
             }
         )
         .astype(
             {
-                "valor": int,
-                "cod_municipio": int,
-                "cod_produto": int,
-                "cod_variavel": int,
-                "ano": int,
+                "cod_unidade_medida": "int32",
+                "valor": "int32",
+                "cod_municipio": "int32",
+                "ano": "int32",
+                "cod_variavel": "int32",
+                "cod_produto": "int32",
             }
         )
     )
     grouped_df = grouped_df.assign(
         valor=np.where(
-            grouped_df["cod_variavel"] == 215,
+            grouped_df["cod_unidade_medida"] == 40,
             grouped_df["valor"] * 1000,
             grouped_df["valor"],
-        )
+        ),
+        unidade_medida=np.where(
+            grouped_df["cod_unidade_medida"] == 40,
+            grouped_df["unidade_medida"].str.replace("Mil ", "").str.capitalize(),
+            grouped_df["unidade_medida"],
+        ),
     )
     return grouped_df
 
@@ -168,4 +173,4 @@ if __name__ == "__main__":
     # Silver
     grouped = union_data()
     transformed = transform_data(grouped)
-    transformed.to_parquet(f"{PATH}/silver/agricultura_silver.parquet", index=False)
+    transformed.to_parquet("../data/silver/agricultura_silver.parquet", index=False)
