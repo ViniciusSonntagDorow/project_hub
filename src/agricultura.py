@@ -89,7 +89,7 @@ def get_all():
     for produto in produtos[:]:
         start_time = time.time()
         data = extractor_agricultura.get_data(product=produto)
-        data.to_parquet(f"../data/bronze/agricultura/{produto}.parquet")
+        data.to_parquet(f"../data/bronze/agricultura/2023_{produto}.parquet")
         elapsed_time = time.time() - start_time
         print(
             f"Time taken for {produto}: {int(elapsed_time // 60)} min and {int(elapsed_time % 60)} sec"

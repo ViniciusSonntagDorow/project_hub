@@ -2,12 +2,11 @@ import time
 from extractor import Extractor
 import pandas as pd
 import os
-import numpy as np
 
 # https://apisidra.ibge.gov.br/home
 
 
-extractor_rebanhos = Extractor("3939", "105", "2023", "79")
+extractor_rebanhos = Extractor("3939", "105", "2022", "79")
 
 
 def get_all_rebanhos():
@@ -29,7 +28,7 @@ def get_all_rebanhos():
     for produto in produtos[:]:
         start_time = time.time()
         data = extractor_rebanhos.get_data(product=produto)
-        data.to_parquet(f"../data/bronze/pecuaria/{produto}.parquet")
+        data.to_parquet(f"../data/bronze/pecuaria/rebanhos/2022_{produto}.parquet")
         elapsed_time = time.time() - start_time
         print(
             f"Time taken for {produto}: {int(elapsed_time // 60)} min and {int(elapsed_time % 60)} sec"
@@ -96,9 +95,9 @@ def transform_data(grouped_df: pd.DataFrame) -> pd.DataFrame:
 
 if __name__ == "__main__":
     # Bronze
-    # get_all_rebanhos()
+    get_all_rebanhos()
 
     # Silver
     grouped = union_data()
     transformed = transform_data(grouped)
-    grouped.to_parquet("../data/silver/pecuaria_silver.parquet", index=False)
+    grouped.to_parquet("../data/silver/pecuaria_rebanhos_silver.parquet", index=False)

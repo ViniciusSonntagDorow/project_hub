@@ -6,8 +6,8 @@ import numpy as np
 
 # https://apisidra.ibge.gov.br/home
 
-extractor_produtos = Extractor("74", "106,215", "2023", "80")
-extractor_aquicultura = Extractor("3940", "4146,215", "2023", "654")
+extractor_produtos = Extractor("74", "106,215", "2022", "80")
+extractor_aquicultura = Extractor("3940", "4146,215", "2022", "654")
 
 
 def get_all_produtos():
@@ -18,7 +18,7 @@ def get_all_produtos():
     for produto in produtos[:]:
         start_time = time.time()
         data = extractor_produtos.get_data(product=produto)
-        data.to_parquet(f"../data/bronze/pecuaria/producao/{produto}.parquet")
+        data.to_parquet(f"../data/bronze/pecuaria/producao/2022_{produto}.parquet")
         elapsed_time = time.time() - start_time
         print(
             f"Time taken for {produto}: {int(elapsed_time // 60)} min and {int(elapsed_time % 60)} sec"
@@ -67,7 +67,7 @@ def get_all_aquicultura():
     for produto in produtos[:]:
         start_time = time.time()
         data = extractor_aquicultura.get_data(product=produto)
-        data.to_parquet(f"../data/bronze/pecuaria/producao/{produto}.parquet")
+        data.to_parquet(f"../data/bronze/pecuaria/producao/2022_{produto}.parquet")
         elapsed_time = time.time() - start_time
         print(
             f"Time taken for {produto}: {int(elapsed_time // 60)} min and {int(elapsed_time % 60)} sec"
