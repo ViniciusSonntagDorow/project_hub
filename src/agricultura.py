@@ -6,7 +6,7 @@ import numpy as np
 
 # https://apisidra.ibge.gov.br/home
 
-extractor_agricultura = Extractor("5457", "8331,216,214,112,215", "2023", "782")
+extractor_agricultura = Extractor("5457", "8331,216,214,112,215", "2022", "782")
 
 
 def get_all():
@@ -89,7 +89,7 @@ def get_all():
     for produto in produtos[:]:
         start_time = time.time()
         data = extractor_agricultura.get_data(product=produto)
-        data.to_parquet(f"../data/bronze/agricultura/2023_{produto}.parquet")
+        data.to_parquet(f"../data/bronze/agricultura/2022_{produto}.parquet")
         elapsed_time = time.time() - start_time
         print(
             f"Time taken for {produto}: {int(elapsed_time // 60)} min and {int(elapsed_time % 60)} sec"
@@ -168,7 +168,7 @@ def transform_data(grouped_df: pd.DataFrame) -> pd.DataFrame:
 
 if __name__ == "__main__":
     # Bronze
-    get_all()
+    # get_all()
 
     # Silver
     grouped = union_data()
