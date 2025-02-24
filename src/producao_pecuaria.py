@@ -18,7 +18,7 @@ def get_all_produtos():
     for produto in produtos[:]:
         start_time = time.time()
         data = extractor_produtos.get_data(product=produto)
-        data.to_parquet(f"../data/bronze/pecuaria/producao/2022_{produto}.parquet")
+        data.to_parquet(f"data/bronze/pecuaria/producao/2022_{produto}.parquet")
         elapsed_time = time.time() - start_time
         print(
             f"Time taken for {produto}: {int(elapsed_time // 60)} min and {int(elapsed_time % 60)} sec"
@@ -67,7 +67,7 @@ def get_all_aquicultura():
     for produto in produtos[:]:
         start_time = time.time()
         data = extractor_aquicultura.get_data(product=produto)
-        data.to_parquet(f"../data/bronze/pecuaria/producao/2022_{produto}.parquet")
+        data.to_parquet(f"data/bronze/pecuaria/producao/2022_{produto}.parquet")
         elapsed_time = time.time() - start_time
         print(
             f"Time taken for {produto}: {int(elapsed_time // 60)} min and {int(elapsed_time % 60)} sec"
@@ -85,8 +85,8 @@ def get_all_aquicultura():
 
 def union_data() -> pd.DataFrame:
     grouped_df = pd.DataFrame()
-    for file in os.listdir("../data/bronze/pecuaria/producao/"):
-        df = pd.read_parquet(f"../data/bronze/pecuaria/producao/{file}")
+    for file in os.listdir("data/bronze/pecuaria/producao/"):
+        df = pd.read_parquet(f"data/bronze/pecuaria/producao/{file}")
         grouped_df = pd.concat([grouped_df, df], ignore_index=True)
     return grouped_df
 
@@ -150,12 +150,9 @@ def transform_data(grouped_df: pd.DataFrame) -> pd.DataFrame:
 
 if __name__ == "__main__":
     # Bronze
-    get_all_produtos()
-    get_all_aquicultura()
+    # get_all_produtos()
+    # get_all_aquicultura()
 
     # Silver
-    grouped = union_data()
-    transformed = transform_data(grouped)
-    transformed.to_parquet(
-        "../data/silver/pecuaria_producao_silver.parquet", index=False
-    )
+    transformed = transform_data(union_data())
+    transformed.to_parquet("data/silver/pecuaria_producao_silver.parquet", index=False)

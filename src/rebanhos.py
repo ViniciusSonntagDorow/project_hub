@@ -28,7 +28,7 @@ def get_all_rebanhos():
     for produto in produtos[:]:
         start_time = time.time()
         data = extractor_rebanhos.get_data(product=produto)
-        data.to_parquet(f"../data/bronze/pecuaria/rebanhos/2022_{produto}.parquet")
+        data.to_parquet(f"data/bronze/pecuaria/rebanhos/2022_{produto}.parquet")
         elapsed_time = time.time() - start_time
         print(
             f"Time taken for {produto}: {int(elapsed_time // 60)} min and {int(elapsed_time % 60)} sec"
@@ -46,8 +46,8 @@ def get_all_rebanhos():
 
 def union_data() -> pd.DataFrame:
     grouped_df = pd.DataFrame()
-    for file in os.listdir("../data/bronze/pecuaria/rebanhos"):
-        df = pd.read_parquet(f"../data/bronze/pecuaria/rebanhos/{file}")
+    for file in os.listdir("data/bronze/pecuaria/rebanhos"):
+        df = pd.read_parquet(f"data/bronze/pecuaria/rebanhos/{file}")
         grouped_df = pd.concat([grouped_df, df], ignore_index=True)
     return grouped_df
 
@@ -95,9 +95,8 @@ def transform_data(grouped_df: pd.DataFrame) -> pd.DataFrame:
 
 if __name__ == "__main__":
     # Bronze
-    get_all_rebanhos()
+    # get_all_rebanhos()
 
     # Silver
-    grouped = union_data()
-    transformed = transform_data(grouped)
-    grouped.to_parquet("../data/silver/pecuaria_rebanhos_silver.parquet", index=False)
+    transformed = transform_data(union_data())
+    transformed.to_parquet("data/silver/pecuaria_rebanhos_silver.parquet", index=False)
